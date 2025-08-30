@@ -30,7 +30,7 @@ app.get("/api", (req: Request, res: Response) => {
    });
 });
 
-const PORT = 5000;
+const PORT = process.env.NODE_ENV || 5000;
 
 // handle no router found
 app.use((req: Request, res: Response, next: NextFunction) => {
