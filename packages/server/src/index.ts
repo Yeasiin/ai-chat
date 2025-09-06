@@ -49,7 +49,7 @@ const promptSchema = z.object({
    history: z.array(messageSchema).optional().default([]),
 });
 
-app.get("/api/v1/chat", async (req: Request, res: Response) => {
+app.post("/api/v1/chat", async (req: Request, res: Response) => {
    const { prompt, userId, sessionId, history } = promptSchema.parse(req.body);
    const { id, message } = await chatService.sendMessage(prompt, history);
 
