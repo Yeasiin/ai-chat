@@ -8,8 +8,11 @@ import express, {
    type Response,
    type NextFunction,
 } from "express";
+import z from "zod";
+import { StatusCodes } from "http-status-codes";
 import AppError from "./utils/appError";
 import globalErrorHandler from "./controllers/errorController";
+import { chatService } from "./services/chat.service";
 
 const app = express();
 
@@ -30,7 +33,33 @@ app.get("/api", (req: Request, res: Response) => {
    });
 });
 
-const PORT = process.env.NODE_ENV || 5000;
+const messageSchema = z.object({
+   role: z.enum(["user", "model"]),
+   parts: z.array(z.object({ text: z.string() })),
+});
+
+const promptSchema = z.object({
+   prompt: z
+      .string()
+      .trim()
+      .min(1, "prompt text is required")
+      .max(1000, "prompt length is too big"),
+   userId: z.string().min(1, "User id is required"),
+   sessionId: z.string().min(1, "Session is required"),
+   history: z.array(messageSchema).optional().default([]),
+});
+
+app.get("/api/v1/chat", async (req: Request, res: Response) => {
+   const { prompt, userId, sessionId, history } = promptSchema.parse(req.body);
+   const { id, message } = await chatService.sendMessage(prompt, history);
+
+   res.status(StatusCodes.OK).json({
+      success: true,
+      message: message,
+   });
+});
+
+const PORT = process.env.PORT || 5000;
 
 // handle no router found
 app.use((req: Request, res: Response, next: NextFunction) => {
