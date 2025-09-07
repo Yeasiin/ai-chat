@@ -1,27 +1,32 @@
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { FormState, UseFormRegister } from "react-hook-form";
 import { Button } from "./ui/button";
 
 export default function ChatInput({
    onSubmit,
    register,
-   errors,
+   formState,
+   isBotTyping,
 }: {
    onSubmit: (e: React.FormEvent) => void;
    register: UseFormRegister<{ prompt: string }>;
-   errors: FieldErrors<{ prompt: string }>;
+   formState: FormState<{
+      prompt: string;
+   }>;
+   isBotTyping: boolean;
 }) {
+   const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+         // e.preventDefault();
+         onSubmit(e);
+      }
+   };
+
    return (
       <div>
-         {errors.prompt && (
-            <p className="text-red-500 text-sm mx-3 mb-1">
-               {typeof errors.prompt?.message === "string"
-                  ? errors.prompt.message
-                  : "This field has an error"}
-            </p>
-         )}
-         <form onSubmit={onSubmit}>
+         <form onKeyDown={handleKeyDown} onSubmit={onSubmit}>
             <div className="flex flex-col items-end gap-2 p-4 border-2 rounded-3xl border-dark-200 ">
                <textarea
+                  autoFocus
                   placeholder="Ask anything"
                   className="w-full border-0 focus:outline-0 resize-none"
                   maxLength={1000}
@@ -30,7 +35,11 @@ export default function ChatInput({
                      setValueAs: (v) => v.trim(),
                   })}
                />
-               <Button onClick={onSubmit} className="rounded-full size-9">
+               <Button
+                  disabled={!formState.isValid || isBotTyping}
+                  onClick={onSubmit}
+                  className="rounded-full size-9"
+               >
                   <svg
                      xmlns="http://www.w3.org/2000/svg"
                      width="0.88em"

@@ -6,20 +6,25 @@ type MessageResponse = {
    id: string | undefined;
    message: string | undefined;
 };
+type PartsType = Array<
+   | { text: string }
+   | { text?: string; inlineData: { data: string; mimeType: string } }
+>;
+
 export const chatService = {
    async sendMessage(
-      prompt: string,
+      prompt: PartsType,
       history: {
          role: "user" | "model";
-         parts: Array<{ text: string }>;
+         parts: PartsType;
       }[]
    ): Promise<MessageResponse> {
       const response = await client.models.generateContent({
          model: "gemini-2.5-flash-lite",
-         contents: [...history, { role: "user", parts: [{ text: prompt }] }],
+         contents: [...history, { role: "user", parts: prompt }],
          config: {
             temperature: 0.2,
-            maxOutputTokens: 200,
+            maxOutputTokens: 1024,
          },
       });
 
