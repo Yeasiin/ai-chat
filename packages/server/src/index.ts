@@ -95,9 +95,9 @@ app.post(
          });
       }
 
-      // @ts-ignore
       const { id, message } = await chatService.sendMessage(
          promptParts,
+         // @ts-ignore
          history
       );
 
