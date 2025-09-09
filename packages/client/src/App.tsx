@@ -5,6 +5,13 @@ import ChatInput from "./components/ChatInput";
 import { useChatStore } from "./lib/store";
 import { useEffect, useRef, useState } from "react";
 import TypingIndicator from "./components/TypingIndicator";
+import popSound from "@/assets/sounds/pop.mp3";
+import notificationSound from "@/assets/sounds/notification.mp3";
+
+const popAudio = new Audio(popSound);
+popAudio.volume = 0.3;
+const notificationAudio = new Audio(notificationSound);
+notificationAudio.volume = 0.3;
 
 function App() {
    const [isBotTyping, setIsBotTyping] = useState(false);
@@ -21,7 +28,7 @@ function App() {
    const onSubmit = async (data: { prompt: string }) => {
       addMessageToHistory({ role: "user", prompt: data.prompt });
       setIsBotTyping(true);
-
+      popAudio.play();
       axios
          .post("http://localhost:5000/api/v1/chat", {
             prompt: data.prompt,
@@ -32,6 +39,7 @@ function App() {
          .then(({ data }) => {
             if (data.success) {
                addMessageToHistory({ role: "model", prompt: data.message });
+               notificationAudio.play();
             }
          })
          .finally(() => {
