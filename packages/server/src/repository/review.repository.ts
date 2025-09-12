@@ -18,7 +18,7 @@ export const reviewRepository = {
    },
    storeReviewSummary: async (productId: number, summary: string) => {
       const now = dayjs().toDate();
-      const expiresAt = dayjs().add(2, "minute").toDate();
+      const expiresAt = dayjs().add(1, "minute").toDate();
 
       const data = {
          content: summary,

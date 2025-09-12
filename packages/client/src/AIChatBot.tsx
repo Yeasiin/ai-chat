@@ -13,7 +13,7 @@ popAudio.volume = 0.3;
 const notificationAudio = new Audio(notificationSound);
 notificationAudio.volume = 0.3;
 
-function App() {
+export default function AIChatBot() {
    const [isBotTyping, setIsBotTyping] = useState(false);
    const lastMessageRef = useRef<HTMLDivElement>(null);
    const { history, addMessageToHistory } = useChatStore();
@@ -82,5 +82,3 @@ function App() {
       </div>
    );
 }
-
-export default App;
