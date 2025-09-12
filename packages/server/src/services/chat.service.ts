@@ -50,7 +50,6 @@ export const chatService = {
          config: {
             temperature: 0.2,
             maxOutputTokens: 1024,
-            systemInstruction: instruction,
          },
       });
 

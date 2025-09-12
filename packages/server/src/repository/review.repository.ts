@@ -11,13 +11,14 @@ export const reviewRepository = {
    },
    getSummary: async (productId: number) => {
       const now = dayjs().toDate();
-      return await prisma.summary.findFirst({
+      const summary = await prisma.summary.findFirst({
          where: { AND: [{ productId: productId }, { expiresAt: { gt: now } }] },
       });
+      return summary ? summary.content : null;
    },
    storeReviewSummary: async (productId: number, summary: string) => {
       const now = dayjs().toDate();
-      const expiresAt = dayjs().add(5, "minute").toDate();
+      const expiresAt = dayjs().add(2, "minute").toDate();
 
       const data = {
          content: summary,
@@ -26,7 +27,7 @@ export const reviewRepository = {
          productId: productId,
       };
 
-      prisma.summary.upsert({
+      await prisma.summary.upsert({
          where: { productId: productId },
          create: data,
          update: data,
