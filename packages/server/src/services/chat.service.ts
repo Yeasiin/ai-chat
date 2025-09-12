@@ -37,7 +37,22 @@ export const chatService = {
             systemInstruction: instruction,
          },
       });
-      console.log(response, "---");
+
+      return {
+         id: response.responseId,
+         message: response.text,
+      };
+   },
+   async summarizeReview(prompt: PartsType): Promise<MessageResponse> {
+      const response = await client.models.generateContent({
+         model: "gemini-2.5-flash-lite",
+         contents: [{ role: "user", parts: prompt }],
+         config: {
+            temperature: 0.2,
+            maxOutputTokens: 1024,
+            systemInstruction: instruction,
+         },
+      });
 
       return {
          id: response.responseId,

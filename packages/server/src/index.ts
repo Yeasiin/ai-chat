@@ -8,12 +8,10 @@ import express, {
    type Response,
    type NextFunction,
 } from "express";
-import z from "zod";
-import { StatusCodes } from "http-status-codes";
-import multer from "multer";
 import AppError from "./utils/appError";
-import globalErrorHandler from "./controllers/errorController";
-import { chatService } from "./services/chat.service";
+import globalErrorHandler from "./controllers/error.controller";
+import { chatRouter } from "./routes/chat.router";
+import { reviewRouter } from "./routes/review.router";
 
 const app = express();
 
@@ -28,85 +26,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-
 app.get("/api", (req: Request, res: Response) => {
    res.json({
       message: "Yep! Working",
    });
 });
 
-const textPartSchema = z.object({ text: z.string() });
-const inlineDataSchema = z.object({
-   inlineData: z.object({
-      mimeType: z.string(),
-      data: z.string(),
-      text: z.string().optional(),
-   }),
-});
-
-const messageSchema = z.object({
-   role: z.enum(["user", "model"]),
-   parts: z.tuple([textPartSchema, inlineDataSchema.optional()]),
-});
-
-const promptSchema = z.object({
-   prompt: z
-      .string()
-      .trim()
-      .min(1, "prompt text is required")
-      .max(1000, "prompt length is too big"),
-   userId: z.string().min(1, "User id is required"),
-   sessionId: z.string().min(1, "Session is required"),
-   history: z.preprocess((val) => {
-      if (typeof val === "string") {
-         try {
-            return JSON.parse(val);
-         } catch (error) {
-            return [];
-         }
-      }
-   }, z.array(messageSchema).optional().default([])),
-});
-
-app.post(
-   "/api/v1/chat",
-   upload.single("image"),
-   async (req: Request, res: Response) => {
-      const { prompt, userId, sessionId, history } = promptSchema.parse(
-         req.body
-      );
-
-      console.log(req.file, "files");
-
-      const promptParts: Array<
-         | { text: string }
-         | { text?: string; inlineData: { data: string; mimeType: string } }
-      > = [{ text: prompt }];
-
-      if (req.file) {
-         console.log(req.file.buffer.toString("base64"));
-         promptParts.push({
-            inlineData: {
-               mimeType: req.file.mimetype,
-               data: req.file.buffer.toString("base64"),
-            },
-         });
-      }
-
-      const { id, message } = await chatService.sendMessage(
-         promptParts,
-         // @ts-ignore
-         history
-      );
-
-      res.status(StatusCodes.OK).json({
-         success: true,
-         message: message,
-      });
-   }
-);
+app.use(chatRouter);
+app.use(reviewRouter);
 
 const PORT = process.env.PORT || 5000;
 
