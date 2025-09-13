@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
 import z from "zod";
 import { StatusCodes } from "http-status-codes";
-import { chatService } from "../services/chat.service";
+import { aiClient } from "../llm/aiClient";
 
 const textPartSchema = z.object({ text: z.string() });
 const inlineDataSchema = z.object({
@@ -53,7 +53,7 @@ export const chatController = {
             },
          });
       }
-      const { id, message } = await chatService.sendMessage(
+      const { id, message } = await aiClient.sendMessage(
          promptParts,
          // @ts-ignore
          history
